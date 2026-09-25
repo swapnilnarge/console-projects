@@ -1,0 +1,15 @@
+target/
+build/
+bin/
+out/
+*.class
+
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+*.log
+.DS_Store
+Thumbs.db
