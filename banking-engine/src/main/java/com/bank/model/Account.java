@@ -1,5 +1,6 @@
 package com.bank.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,32 +10,31 @@ import java.util.UUID;
 public abstract class Account {
     private final String accountNumber;
     private final String accountName;
-    protected double balance;
+    protected BigDecimal balance;
     private final List<Transaction> transactionHistory;
 
-    public Account(String accountNumber, String accountName, double initialDeposit) {
-        if (initialDeposit < 0) {
-            throw new IllegalArgumentException("Intial balance cannot be negative");
-        }
-        this.balance = initialDeposit;
-
+    public Account(String accountNumber, String accountName, BigDecimal initialDeposit) {
         if (accountNumber == null || accountNumber.isBlank()) {
             throw new IllegalArgumentException("Account number cannot be empty.");
         }
-        this.accountNumber = accountNumber;
-
         if (accountName == null || accountName.isBlank()) {
             throw new IllegalArgumentException("Account holder name cannot be empty.");
         }
+        if(initialDeposit == null || initialDeposit.compareTo(BigDecimal.ZERO) < 0){
+            throw new IllegalArgumentException("Initial balance cannot be negative or null.");
+        }
+        this.accountNumber = accountNumber;
+        this.balance = initialDeposit;
         this.accountName = accountName;
         this.transactionHistory = new ArrayList<>();
+
     }
 
-    public void deposit(double amount) {
-        if (amount <= 0) {
+    public void deposit(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount should be greater than zero.");
         }
-        this.balance += amount;
+        this.balance = this.balance.add(amount);
         Transaction tx = new Transaction(UUID.randomUUID().toString(), TransactionType.DEPOSIT, amount, this.balance, LocalDateTime.now());
         this.transactionHistory.add(tx);
     }
@@ -47,15 +47,12 @@ public abstract class Account {
         return accountNumber;
     }
 
-    public double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
 
-    public abstract void withdraw(double amount);
+    public abstract void withdraw(BigDecimal amount);
 
     public List<Transaction> getTransactionHistory(){
         return Collections.unmodifiableList(this.transactionHistory);
