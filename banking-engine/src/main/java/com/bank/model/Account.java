@@ -20,13 +20,18 @@ public abstract class Account {
         if (accountName == null || accountName.isBlank()) {
             throw new IllegalArgumentException("Account holder name cannot be empty.");
         }
-        if(initialDeposit == null || initialDeposit.compareTo(BigDecimal.ZERO) < 0){
+        if (initialDeposit == null || initialDeposit.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Initial balance cannot be negative or null.");
         }
         this.accountNumber = accountNumber;
         this.balance = initialDeposit;
         this.accountName = accountName;
         this.transactionHistory = new ArrayList<>();
+
+        if (initialDeposit.compareTo(BigDecimal.ZERO) > 0) {
+            Transaction tx = new Transaction(UUID.randomUUID().toString(), TransactionType.DEPOSIT, initialDeposit, this.balance, LocalDateTime.now());
+            this.transactionHistory.add(tx);
+        }
 
     }
 
@@ -51,10 +56,9 @@ public abstract class Account {
         return balance;
     }
 
-
     public abstract void withdraw(BigDecimal amount);
 
-    public List<Transaction> getTransactionHistory(){
+    public List<Transaction> getTransactionHistory() {
         return Collections.unmodifiableList(this.transactionHistory);
     }
 }
