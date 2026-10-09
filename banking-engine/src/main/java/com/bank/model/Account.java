@@ -29,10 +29,13 @@ public abstract class Account {
         this.transactionHistory = new ArrayList<>();
 
         if (initialDeposit.compareTo(BigDecimal.ZERO) > 0) {
-            Transaction tx = new Transaction(UUID.randomUUID().toString(), TransactionType.DEPOSIT, initialDeposit, this.balance, LocalDateTime.now());
-            this.transactionHistory.add(tx);
+            this.transactionHelper(TransactionType.DEPOSIT, initialDeposit);
         }
+    }
 
+    private void transactionHelper(TransactionType type, BigDecimal amount) {
+        Transaction tx = new Transaction(UUID.randomUUID().toString(), type, amount, this.balance, LocalDateTime.now());
+        this.transactionHistory.add(tx);
     }
 
     public void deposit(BigDecimal amount) {
@@ -40,8 +43,18 @@ public abstract class Account {
             throw new IllegalArgumentException("Deposit amount should be greater than zero.");
         }
         this.balance = this.balance.add(amount);
-        Transaction tx = new Transaction(UUID.randomUUID().toString(), TransactionType.DEPOSIT, amount, this.balance, LocalDateTime.now());
-        this.transactionHistory.add(tx);
+        this.transactionHelper(TransactionType.DEPOSIT, amount);
+    }
+
+    protected abstract void validateWithdrawal(BigDecimal amount);
+
+    public void withdraw(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("withdraw amount should be greater than zero");
+        }
+        validateWithdrawal(amount);
+        this.balance = this.balance.subtract(amount);
+        this.transactionHelper(TransactionType.WITHDRAWAL, amount);
     }
 
     public String getAccountName() {
@@ -55,8 +68,6 @@ public abstract class Account {
     public BigDecimal getBalance() {
         return balance;
     }
-
-    public abstract void withdraw(BigDecimal amount);
 
     public List<Transaction> getTransactionHistory() {
         return Collections.unmodifiableList(this.transactionHistory);
